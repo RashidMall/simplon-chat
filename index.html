@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <h1>Chat</h1>
+    <form action="/" method="post" id="form_chat">
+        <input type="text" name="message" id="message" placeholder="Your message" size="32" autofocus />
+        <input type="submit" id="send_message" value="Send Message" />
+    </form>
+
+    <section id="section_chat">
+
+    </section>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- <script src="./main.js"></script> -->
+    <script>
+        var socket = io.connect('http://localhost:8080');
+
+        var username = prompt('Enter your name:');
+        socket.emit('newClient', username);
+        document.title = username + " - " + document.title;
+
+        socket.on('message', function (data) {
+            insertMessage(data.username, data.message);
+        })
+
+        socket.on('newClient', function (username) {
+            var newChild = '<p><em>' + username + ' is connected!</em></p>';
+            $('#section_chat').prepend(newChild);
+        })
+
+        $('#form_chat').submit(function () {
+            var message = document.getElementById('message').value;
+            socket.emit('message', message);
+            insertMessage(username, message);
+            document.getElementById('message').value = '';
+            document.getElementById('message').focus();
+            return false;
+        })
+
+        function insertMessage(username, message) {
+            var newChild = '<p><strong>' + username + '</strong>: ' + message + '</p>';
+            $('#section_chat').prepend(newChild);
+        }
+    </script>
+</body>
+
+</html>
